@@ -13,6 +13,7 @@ pub fn GetConfig(key:&str)->Result<String,io::Error>
     let obj:Vec<&str>=mycontent.split("\n").collect();
     for item in &obj {
         let idx=item.find(&mykey);
+        println!("myitem=>{}",item);
         match idx {
             Some(v) => {
                 let MyObj:Vec<&str>=item.split("=>").collect();
