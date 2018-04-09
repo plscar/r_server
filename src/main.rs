@@ -1,4 +1,6 @@
 use std::net::{TcpListener,TcpStream};
+use std::io;
+use std::io::prelude::*;
 extern crate r_server;
 
 fn main() {
@@ -24,7 +26,13 @@ fn main() {
         let res=String::new();
         match stream {
             Ok(v) => {
-                res=handing(v);
+                let myres=handing(v);
+                match myres {
+                    Ok(myv) => {
+                        res=myv;
+                    },
+                    Err(mye) => println!("发生错误！"),
+                }
                 },
             Err(e) =>println!("请求错误") ,
         }
@@ -34,7 +42,9 @@ fn main() {
 
 }
 
-fn handing(stream:TcpStream)->String{
-    println!("{}",v.read_to_string());    
-    "ok".to_string()
+fn handing(stre:TcpStream)->Result<String,io::Error>{
+    let mut res=String::new();
+    stre.read_to_string(&mut res)?;
+    println!("{}",res);    
+    Ok("ok".to_string())
 }
