@@ -15,12 +15,11 @@ pub fn get_config(key:&str)->Result<String,io::Error>
     for item in &obj {
         let idx=item.find(&mykey);
         println!("myitem___{}\n",item);
-        match idx {
-            Some(_v) => {
-                let myobj:Vec<&str>=item.split("=>").collect();
-                return Ok(myobj[1].trim_matches('"').to_string());
-            },
-            None => continue,
+        //如果idx中有值，也就是找到了指定的key，则返回对应的value
+        if idx.is_some()
+        {
+            let myobj:Vec<&str>=item.split("=>").collect();
+            return Ok(myobj[1].trim_matches('"').to_string());
         }
     }
     Ok("127.0.0.1:1196".to_string())
