@@ -1,6 +1,8 @@
 use std::net::{TcpListener,TcpStream};
 use std::io;
 use std::io::prelude::*;
+use std::fs::File;
+use common::config;
 ///主方法，开启服务
 /// address:监听地址
 /// max_length:每次处理的请求最大长度
@@ -20,6 +22,7 @@ fn mainlistener(address:&str)->Result<String,io::Error>
     for stream in listener.incoming() {
         let stream=stream.unwrap();
         let _res= handler(stream);
+        
     }
     Ok("open success".to_string())
 }
@@ -28,6 +31,99 @@ fn handler(mut stre:TcpStream)->Result<String,io::Error>{
     let mut buf=[0;1024];
     stre.read(&mut buf)?;
     let request_msg=String::from_utf8_lossy(&buf[..]);
+    println!("request=>\n{}",request_msg);
+    let mut my_res=String::from("");               //用于记录所返回的值
+    let mut status=String::from("200 OK");      //用于记录返回状态
+    //筛选get或post请求
+    if request_msg.contains("GET") {
+        println!(">>\n{}",&request_msg);
+        let r=do_get(&request_msg);
+        match r {
+            Ok(v) => {
+                println!("response ok!");
+                let v_cl=v.clone();
+                println!("myclone=>\n{}",v_cl);
+                let res_head=v_cl.get(0..5);
+                match res_head {
+                    Some(vcc) => {
+                        println!("vcc=>{}",vcc);
+                        if vcc.contains("err=>") {
+                            status="405 ERR".to_string();
+                        }
+                        else
+                        {
+                            my_res=v;
+                        }
+                    },
+                    None => {my_res=v;},
+                }
+                
+            },
+            Err(_e) => {
+                status="404 NO FOUND".to_string();
+            },
+        }
+    }
+    else {
+        // my_res=do_post(&request_msg);
+    }
 
+    //返回请求
+    let _resp= response(stre,&status,&my_res)?;
+    
     Ok("cc".to_string())
+}
+/// 处理get请求，get请求只用于请求html文件
+/// paras:请求所携带的参数，如request:get /index.html?id=1 http/1.1
+fn do_get(paras:&str) -> Result<String,io::Error> {
+    //切割
+    let idx_get=paras.find("GET ");
+    match idx_get {
+        Some(v) => {
+            let (_first,second)=paras.split_at(v+3);
+            let idx_para = second.find("\n");
+            match idx_para {
+                Some(v) => {
+                    let (mut myfirst,mut _mysecond)=second.split_at(v);
+                    let mut r=myfirst.split_whitespace();
+                    match r.next() {
+                        Some(v) => {
+                            let request_path:Vec<&str>=v.split("?").collect();
+                            let c_rs= config::get_config("defaultWebFiles");
+                            let mut f_path=String::new();
+                            let mut f_res=String::new();
+                            match c_rs {
+                                Ok(v_c) => {f_path=v_c},
+                                Err(_e) =>{},
+                            }
+                            let mut f=File::open(f_path.to_string()+request_path[0])?;
+                            f.read_to_string(&mut f_res);
+                            println!("res=>\n{}",f_res );
+                            return Ok(f_res);
+                        },
+                        //get请求无路径
+                        None => {
+                            return Ok("err=>get请求无路径".to_string());
+                        },
+                    }
+                },
+                None => {return Ok("err=>get请求无换行符".to_string())},
+            }
+
+        },
+        None => {return Ok("err=>无法识别的请求".to_string())},
+    }
+}
+// /// 处理post请求，post请求用于数据请求
+// fn do_post(paras:&str)->Result<String,io::Error>
+// {
+//     Ok("C")
+// }
+
+fn response(mut stre:TcpStream,status:&str,res_msg:&str)->Result<String,io::Error>
+{
+    let respon=format!("HTTP/1.1 {} \r\n\r\n{}",status,res_msg);
+    stre.write(respon.as_bytes())?;
+    stre.flush()?;
+    Ok("success".to_string())
 }
