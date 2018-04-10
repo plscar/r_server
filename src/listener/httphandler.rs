@@ -88,8 +88,8 @@ fn do_get(paras:&str) -> Result<String,io::Error> {
     let request_path:Vec<&str>=request_split.split("?").collect();
     //获取config中配置的，默认文件存放目录,如果没有配置，就是本程序的根目录
     let c_rs= config::get_config("defaultWebFiles");
-    let mut f_path=String::from("");
-    let mut f_res=String::new();
+    let mut f_path=String::from("");  //记录config中的配置默认文件路径
+    let mut f_res=String::new();      //记录请求文件的请求结果
     match c_rs {
         Ok(v_c) => {f_path=v_c},
         Err(_e) =>{},
