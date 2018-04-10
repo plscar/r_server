@@ -21,15 +21,15 @@ fn mainlistener(address:&str)->Result<String,io::Error>
     //监听配置的ip地址
     let listener=TcpListener::bind(address)?;
     println!(">>>http服务启动成功<<<\n>>>监听地址:{}<<<",address);
-    for stream in listener.incoming() {
-        let stream=stream.unwrap();
-        let _res= handler(stream);
+    for mut stream in listener.incoming() {
+        let mut stream=stream.unwrap();
+        let _res= handler(&mut stream);
         
     }
     Ok("open success".to_string())
 }
 ///处理http请求
-fn handler(mut stre:TcpStream)->Result<String,io::Error>{
+fn handler(stre:&mut TcpStream)->Result<String,io::Error>{
     let mut buf=[0;1024];
     stre.read(&mut buf)?;
     let request_msg=String::from_utf8_lossy(&buf[..]);
@@ -106,7 +106,7 @@ fn do_get(paras:&str) -> Result<String,io::Error> {
 // }
 
 ///用于向客户端返回数据
-fn response(mut stre:TcpStream,status:&str,res_msg:&str)->Result<String,io::Error>
+fn response(stre:&mut TcpStream,status:&str,res_msg:&str)->Result<String,io::Error>
 {
     let respon=format!("HTTP/1.1 {} \r\n\r\n{}",status,res_msg);
     stre.write(respon.as_bytes())?;
