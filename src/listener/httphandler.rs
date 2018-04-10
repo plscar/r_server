@@ -1,7 +1,9 @@
-use std::net::{TcpListener,TcpStream};
-use std::io;
-use std::io::prelude::*;
-use std::fs::File;
+use std::{
+    net::{TcpListener,TcpStream},
+    io,
+    io::prelude::*,
+    fs::File
+    };
 use common::config;
 ///主方法，开启服务
 /// address:监听地址
@@ -9,7 +11,7 @@ use common::config;
 pub fn open_server(address:&str){
     let myres= mainlistener(address);
     match myres {
-        Ok(v) => println!("成功运行结束"),
+        Ok(_v) => println!("成功运行结束"),
         Err(_e) => println!("http服务启动失败！[{}]",_e),
     }
 }
@@ -36,13 +38,11 @@ fn handler(mut stre:TcpStream)->Result<String,io::Error>{
     let mut status=String::from("200 OK");      //用于记录返回状态
     //筛选get或post请求
     if request_msg.contains("GET") {
-        println!(">>\n{}",&request_msg);
+        //对get进行处理
         let r=do_get(&request_msg);
         match r {
             Ok(v) => {
-                println!("response ok!");
                 let v_cl=v.clone();
-                println!("myclone=>\n{}",v_cl);
                 let res_head=v_cl.get(0..5);
                 match res_head {
                     Some(vcc) => {
@@ -65,6 +65,8 @@ fn handler(mut stre:TcpStream)->Result<String,io::Error>{
         }
     }
     else {
+        //对post进行处理
+        
         // my_res=do_post(&request_msg);
     }
 
@@ -114,12 +116,14 @@ fn do_get(paras:&str) -> Result<String,io::Error> {
         None => {return Ok("err=>无法识别的请求".to_string())},
     }
 }
+
 // /// 处理post请求，post请求用于数据请求
 // fn do_post(paras:&str)->Result<String,io::Error>
 // {
 //     Ok("C")
 // }
 
+///用于向客户端返回数据
 fn response(mut stre:TcpStream,status:&str,res_msg:&str)->Result<String,io::Error>
 {
     let respon=format!("HTTP/1.1 {} \r\n\r\n{}",status,res_msg);

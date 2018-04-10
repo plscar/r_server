@@ -1,8 +1,12 @@
 extern crate r_server;
+use r_server::{
+    common::config,
+    listener::httphandler
+    }; //rust 1.25.0新特性，可以如此写引用
 
 fn main() {
     //读取配置文件中的ip地址
-    let ip_obj=r_server::common::config::get_config("ip");
+    let ip_obj=config::get_config("ip");
     let mut ip=String::new();
 
     match ip_obj{
@@ -17,7 +21,7 @@ fn main() {
         Err(_e)=>panic!("ip获取失败！"),
     }
     println!("listing at  =>{}",ip );
-    r_server::listener::httphandler::open_server(&ip);
+    httphandler::open_server(&ip);
 }
 
 

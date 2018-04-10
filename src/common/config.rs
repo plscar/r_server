@@ -1,6 +1,8 @@
-use std::fs::File;
-use std::io;
-use std::io::prelude::*;
+use std::{
+    fs::File,
+    io,
+    io::prelude::*
+};
 
 ///获取config.cnf中的特定键所对应的值
 pub fn get_config(key:&str)->Result<String,io::Error>
