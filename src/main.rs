@@ -7,7 +7,7 @@ use r_server::{
 fn main() {
     //读取配置文件中的ip地址
     let ip_obj=config::get_config("ip");
-    let mut ip=String::new();
+    let mut ip;
 
     match ip_obj{
         Ok(v)=>{
