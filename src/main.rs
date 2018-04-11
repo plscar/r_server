@@ -23,5 +23,3 @@ fn main() {
     println!("listing at  =>{}",ip );
     httphandler::open_server(&ip);
 }
-
-

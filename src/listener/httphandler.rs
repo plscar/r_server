@@ -5,7 +5,20 @@ use std::{
     fs::File,
     collections::HashMap,
     };
-use common::config;
+use common::{
+    config,
+    declare
+    };
+
+#[derive(Clone)]
+struct request_para {
+    path:String,
+    path_para:String,
+    body_para:String,
+}
+
+
+
 ///主方法，开启服务
 /// address:监听地址
 /// max_length:每次处理的请求最大长度
@@ -96,27 +109,18 @@ fn do_get(paras:request_para) -> Result<String,io::Error> {
     Ok(f_res)
 }
 
-#[derive(Clone)]
-struct request_para {
-    path:String,
-    path_para:String,
-    body_para:String,
-}
-
 /// 处理post请求，post请求用于数据请求
-fn do_post(paras:&str)->Result<String,io::Error>
+fn do_post(paras:request_para)->Result<String,io::Error>
 {
-    println!("post=>\n{}",paras );
-
+    // println!("post=>\n{}",paras.path );
+    declare::GetFns("demomymy");
     Ok("C".to_string())
 }
 ///拆分请求，拆分成路径/路径后附带的参数/request body中的参数
 fn splitRequires(paras:&str,method:&str,defaultPath:&mut str)->Result<request_para,io::Error>
 {
-    
     //切割get请求，分割get及其后面的内容
     let idx_get=paras.find(method);
-    
     let idx_get_value=idx_get.expect("err=>请求解析失败！");
     let (_,second)=paras.split_at(idx_get_value+3);
     //在分割后的后端内容中，截取第一行，其中含有了要访问的文件地址
@@ -146,4 +150,5 @@ fn response(stre:&mut TcpStream,status:&str,res_msg:&str)->Result<String,io::Err
     stre.write(respon.as_bytes())?;
     stre.flush()?;
     Ok("success".to_string())
+    
 }
